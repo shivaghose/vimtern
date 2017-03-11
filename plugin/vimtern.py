@@ -4,6 +4,7 @@ VIMTern.py dispatch work to your intern via Slack from the command line.
 '''
 from random import randint
 from sys import exit, argv
+import os
 import argparse
 import yaml  # To load the intrn file
 
@@ -45,7 +46,15 @@ def vimtern_do(msg, intrn_file):
         print "vimtern_do: msg is not a string."
         print "msg: ", msg
         exit(1)
-    msg = msg.replace('"', '').strip()
+
+    host = platform.node()
+    try:
+        user = os.getlogin()
+    except Exception as e:
+        if VERBOSE:
+            print e
+        user = "someone"
+    msg = user + "@" + host + " says: " + msg.replace('"', '').strip()
 
     sc = SlackClient(config["Slack"]["token"])
     if VERBOSE:
