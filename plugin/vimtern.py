@@ -6,8 +6,7 @@ from random import randint
 from sys import exit, argv
 import os
 import argparse
-import yaml # To load the intrn file
-import platform
+import yaml  # To load the intrn file
 
 VERBOSE = False
 
@@ -16,6 +15,7 @@ try:
 except ImportError:
     print "Unable to import the SlackClient."
     exit(1)
+
 
 def _load_intrn(intrn_file="default.intrn"):
     '''
@@ -30,9 +30,10 @@ def _load_intrn(intrn_file="default.intrn"):
             exit(1)
     return config
 
+
 def vimtern_do(msg, intrn_file):
     '''
-    Tell your intern to do things.
+    Issue commands to 1ntern.
     '''
     global VERBOSE
     if not intrn_file:
@@ -40,7 +41,7 @@ def vimtern_do(msg, intrn_file):
     config = _load_intrn(intrn_file)
     if not msg or msg == '':
         num = len(config["default_msgs"])
-        msg = config["default_msgs"][randint(0, num-1)]
+        msg = config["default_msgs"][randint(0, num - 1)]
     if not isinstance(msg, basestring):
         print "vimtern_do: msg is not a string."
         print "msg: ", msg
@@ -57,21 +58,32 @@ def vimtern_do(msg, intrn_file):
 
     sc = SlackClient(config["Slack"]["token"])
     if VERBOSE:
-        print ">"*5, msg
+        print ">" * 5, msg
     channel = config["Slack"]["channel"]
     icon_emoji = config["Slack"]["icon_emoji"]
     sc.api_call("chat.postMessage",
                 channel=channel,
                 text=msg,
-                username=config["Slack"]["username"],
-                icon_emoji=icon_emoji)
+                parse="full",
+                username=config["Slack"]["username"], icon_emoji=icon_emoji)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-f", "--config",
+    parser.add_argument("-f",
+                        "--config",
+                        dest='config',
                         help="Path to the .intrn config file.")
-    parser.add_argument("-m", "--msg", help="Message to send.", default="")
-    parser.add_argument('-v', '--verbose', dest='verbose', action='store_true')
+    parser.add_argument("-m",
+                        "--msg",
+                        dest='msg',
+                        help="Message to send.",
+                        default="")
+    parser.add_argument('-v',
+                        '--verbose',
+                        dest='verbose',
+                        action='store_true',
+                        help='Verbose mode to help debug.')
     parser.set_defaults(verbose=False)
     args = parser.parse_args()
 
@@ -84,4 +96,3 @@ if __name__ == "__main__":
     except Exception, e:
         print str(e)
         parser.print_help()
-
